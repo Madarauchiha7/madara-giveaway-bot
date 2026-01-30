@@ -513,29 +513,38 @@ async def admin_create_code_save(update: Update, context: ContextTypes.DEFAULT_T
 
 # ---------- ROUTER ----------
 async def text_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    t = (update.message.text or "").strip()
+    # ✅ SAFETY CHECK (MOST IMPORTANT)
+    if update.message is None or update.message.text is None:
+        return
+
+    t = update.message.text.strip()
 
     if t == "👤 MY PROFILE":
         return await my_profile(update, context)
+
     if t == "💳 Redeem Code":
         return await redeem_entry(update, context)
+
     if t == "🛠 ADMIN PANEL":
         return await admin_panel(update, context)
 
     if t == "📣 BROADCAST":
         return await admin_broadcast_entry(update, context)
+
     if t == "🎫 CREATE REDEEM CODE":
         return await admin_create_code_entry(update, context)
+
     if t == "⬅️ BACK":
         return await admin_back(update, context)
 
-    # default
+    # 🔁 Default fallback
     if not await ensure_access(update, context):
         return
+
     await update.message.reply_text(
         "Choose an option from menu ✅",
         reply_markup=main_menu_kb(update.effective_user.id in ADMINS)
-    )
+            )
 
 def build_app() -> Application:
     app = Application.builder().token(BOT_TOKEN).build()
